@@ -4,9 +4,16 @@ import {
   useDispatch as dispatchHook,
   useSelector as selectorHook
 } from 'react-redux';
+import ingredientsReducer from '../slices/ingredientsSlice';
+import constructorReducer from '../slices/constructorSlice';
+console.log('constructorReducer:', constructorReducer); // Проверить импорт
+import userReducer from '../slices/userSlice';
 
+// Корневой
 const rootReducer = combineReducers({
-  // Позже добавим
+  ingredients: ingredientsReducer,
+  constructor: constructorReducer,
+  user: userReducer
 });
 
 const store = configureStore({

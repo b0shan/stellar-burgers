@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { TIngredient } from '@utils-types';
 import { getIngredientsApi } from '@api';
 
+// Асинхроннка
 export const fetchIngredients = createAsyncThunk(
   'ingredients/fetchAll',
   getIngredientsApi
