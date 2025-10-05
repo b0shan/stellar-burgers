@@ -1,5 +1,11 @@
 import { Provider } from 'react-redux';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+  useNavigate
+} from 'react-router-dom';
 import store from '../../services/store';
 import {
   ConstructorPage,
@@ -12,34 +18,41 @@ import {
   Feed,
   NotFound404
 } from '@pages';
-import { AppHeader, IngredientDetails, OrderInfo } from '@components';
+import { AppHeader, Modal, IngredientDetails, OrderInfo } from '@components';
 import '../../index.css';
 import styles from './app.module.css';
 import { FC } from 'react';
 
 // Компонент для модального окна с ингредиентом
-// const IngredientModal: FC = () => {
-//   const navigate = useNavigate();
-//   const handleClose = () => navigate(-1);
+const IngredientModal: FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
 
-//   return (
-//     <Modal title="Детали ингредиента" onClose={handleClose}>
-//       <IngredientDetails />
-//     </Modal>
-//   );
-// };
+  const handleClose = () => {
+    navigate(-1);
+  };
+
+  return (
+    <Modal title='Детали ингредиента' onClose={handleClose}>
+      <IngredientDetails />
+    </Modal>
+  );
+};
 
 // Компонент для модального окна с заказом
-// const OrderModal: FC = () => {
-//   const navigate = useNavigate();
-//   const handleClose = () => navigate(-1);
+const OrderModal: FC = () => {
+  const navigate = useNavigate();
 
-//   return (
-//     <Modal title="" onClose={handleClose}>
-//       <OrderInfo />
-//     </Modal>
-//   );
-// };
+  const handleClose = () => {
+    navigate(-1);
+  };
+
+  return (
+    <Modal title='' onClose={handleClose}>
+      <OrderInfo />
+    </Modal>
+  );
+};
 
 const App: FC = () => (
   <Provider store={store}>
@@ -47,34 +60,28 @@ const App: FC = () => (
       <div className={styles.app}>
         <AppHeader />
         <Routes>
-          {/* Главная страница */}
+          {/* Основные маршруты */}
           <Route path='/' element={<ConstructorPage />} />
-
-          {/* Авторизация */}
           <Route path='/login' element={<Login />} />
           <Route path='/register' element={<Register />} />
           <Route path='/forgot-password' element={<ForgotPassword />} />
           <Route path='/reset-password' element={<ResetPassword />} />
-
-          {/* Профиль */}
           <Route path='/profile' element={<Profile />} />
           <Route path='/profile/orders' element={<ProfileOrders />} />
-          <Route path='/profile/orders/:number' element={<OrderInfo />} />
-
-          {/* Лента заказов */}
           <Route path='/feed' element={<Feed />} />
-          <Route path='/feed/:number' element={<OrderInfo />} />
-
-          {/* Ингредиенты */}
           <Route path='/ingredients/:id' element={<IngredientDetails />} />
-        </Routes>
+          <Route path='/feed/:number' element={<OrderInfo />} />
+          <Route path='/profile/orders/:number' element={<OrderInfo />} />
+          <Route path='*' element={<NotFound404 />} />
 
-        {/* Маршруты для модальных окон */}
-        {/* <Routes>
-          <Route path="/ingredients/:id/modal" element={<IngredientModal />} />
-          <Route path="/feed/:number/modal" element={<OrderModal />} />
-          <Route path="/profile/orders/:number/modal" element={<OrderModal />} />
-        </Routes> */}
+          {/* Маршруты для модальных окон */}
+          <Route path='/ingredients/:id/modal' element={<IngredientModal />} />
+          <Route path='/feed/:number/modal' element={<OrderModal />} />
+          <Route
+            path='/profile/orders/:number/modal'
+            element={<OrderModal />}
+          />
+        </Routes>
       </div>
     </Router>
   </Provider>
