@@ -9,6 +9,7 @@ import {
   orderBurgerApi,
   getOrdersApi,
   getFeedsApi,
+  updateUserApi,
   TLoginData,
   TRegisterData
 } from '@api';
@@ -17,13 +18,10 @@ import { setCookie, getCookie, deleteCookie } from '../utils/cookie';
 export const fetchIngredients = createAsyncThunk(
   'burger/fetchIngredients',
   async () => {
-    console.log('Fetching ingredients from API...');
     try {
       const ingredients = await getIngredientsApi();
-      console.log('Ingredients received:', ingredients);
       return ingredients;
     } catch (error) {
-      console.error('Error fetching ingredients:', error);
       throw error;
     }
   }
@@ -80,6 +78,14 @@ export const getUser = createAsyncThunk('burger/getUser', async () => {
   const response = await getUserApi();
   return response.user;
 });
+
+export const updateUser = createAsyncThunk(
+  'burger/updateUser',
+  async (userData: Partial<TRegisterData>) => {
+    const response = await updateUserApi(userData);
+    return response.user;
+  }
+);
 
 type BurgerState = {
   ingredients: {
@@ -279,6 +285,18 @@ const burgerSlice = createSlice({
       })
       .addCase(getUser.rejected, (state) => {
         state.user.data = null;
+      })
+      .addCase(updateUser.pending, (state) => {
+        state.user.loading = true;
+        state.user.error = null;
+      })
+      .addCase(updateUser.fulfilled, (state, action) => {
+        state.user.data = action.payload;
+        state.user.loading = false;
+      })
+      .addCase(updateUser.rejected, (state, action) => {
+        state.user.loading = false;
+        state.user.error = action.error.message || 'Ошибка обновления данных';
       });
   }
 });

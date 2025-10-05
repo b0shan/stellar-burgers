@@ -8,7 +8,6 @@ export const Feed: FC = () => {
   const dispatch = useDispatch();
   const { data: orders, loading } = useSelector((state) => state.burger.feed);
 
-  // Загружаем данные только один раз при монтировании
   useEffect(() => {
     if (orders.length === 0) {
       dispatch(fetchFeed());

@@ -18,7 +18,7 @@ export const BurgerIngredientUI: FC<TBurgerIngredientUIProps> = memo(
       <li className={styles.container}>
         <Link
           className={styles.article}
-          to={`/ingredients/${_id}`}
+          to={`/ingredients/${_id}/modal`} // Путь для модального окна
           state={locationState}
         >
           {count && <Counter count={count} />}

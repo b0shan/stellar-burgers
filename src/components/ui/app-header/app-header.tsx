@@ -12,7 +12,6 @@ import {
 export const AppHeaderUI: FC<TAppHeaderUIProps> = ({ userName }) => {
   const location = useLocation();
 
-  // Определяем активные состояния
   const isConstructorActive = location.pathname === '/';
   const isFeedActive = location.pathname === '/feed';
   const isProfileActive =
@@ -22,10 +21,10 @@ export const AppHeaderUI: FC<TAppHeaderUIProps> = ({ userName }) => {
     <header className={styles.header}>
       <nav className={`${styles.menu} p-4`}>
         <div className={styles.menu_part_left}>
-          {/* Конструктор с Link */}
+          {/* Кнопка Конструктор */}
           <Link
             to='/'
-            className={`${styles.menu_item} ${isConstructorActive ? styles.active : ''}`}
+            className={`${styles.link} ${isConstructorActive ? styles.link_active : ''}`}
           >
             <BurgerIcon type={isConstructorActive ? 'primary' : 'secondary'} />
             <p className='text text_type_main-default ml-2 mr-10'>
@@ -33,10 +32,10 @@ export const AppHeaderUI: FC<TAppHeaderUIProps> = ({ userName }) => {
             </p>
           </Link>
 
-          {/* Лента заказов с Link */}
+          {/* Кнопка Лента заказов */}
           <Link
             to='/feed'
-            className={`${styles.menu_item} ${isFeedActive ? styles.active : ''}`}
+            className={`${styles.link} ${isFeedActive ? styles.link_active : ''}`}
           >
             <ListIcon type={isFeedActive ? 'primary' : 'secondary'} />
             <p className='text text_type_main-default ml-2'>Лента заказов</p>
@@ -47,10 +46,10 @@ export const AppHeaderUI: FC<TAppHeaderUIProps> = ({ userName }) => {
           <Logo className='' />
         </div>
 
-        {/* Личный кабинет с Link */}
+        {/* Кнопка Личный кабинет */}
         <Link
           to='/profile'
-          className={`${styles.link_position_last} ${styles.menu_item} ${isProfileActive ? styles.active : ''}`}
+          className={`${styles.link} ${styles.link_position_last} ${isProfileActive ? styles.link_active : ''}`}
         >
           <ProfileIcon type={isProfileActive ? 'primary' : 'secondary'} />
           <p className='text text_type_main-default ml-2'>
