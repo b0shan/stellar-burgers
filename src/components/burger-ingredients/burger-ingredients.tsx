@@ -3,20 +3,15 @@ import { useInView } from 'react-intersection-observer';
 import { useSelector, useDispatch } from '../../services/store';
 import { TTabMode } from '@utils-types';
 import { BurgerIngredientsUI } from '../ui/burger-ingredients';
-import { fetchIngredients } from '../../slices/ingredientsSlice';
+import { fetchIngredients } from '../../slices/burgerSlice';
 
 export const BurgerIngredients: FC = () => {
   const dispatch = useDispatch();
-  const { ingredients, loading } = useSelector((state) => state.ingredients);
+  const { data: ingredients, loading } = useSelector(
+    (state) => state.burger.ingredients
+  );
 
-  // Фильтруем ингредиенты по типам
-  const buns = ingredients.filter((item) => item.type === 'bun');
-  const mains = ingredients.filter((item) => item.type === 'main');
-  const sauces = ingredients.filter((item) => item.type === 'sauce');
-
-  console.log('Buns:', buns);
-  console.log('Mains:', mains);
-  console.log('Sauces:', sauces);
+  console.log('Ingredients state:', { ingredients, loading });
 
   const [currentTab, setCurrentTab] = useState<TTabMode>('bun');
   const titleBunRef = useRef<HTMLHeadingElement>(null);
@@ -28,6 +23,7 @@ export const BurgerIngredients: FC = () => {
   const [saucesRef, inViewSauces] = useInView({ threshold: 0 });
 
   useEffect(() => {
+    console.log('Fetching ingredients from API...');
     dispatch(fetchIngredients());
   }, [dispatch]);
 
@@ -40,6 +36,14 @@ export const BurgerIngredients: FC = () => {
       setCurrentTab('main');
     }
   }, [inViewBuns, inViewFilling, inViewSauces]);
+
+  if (loading) {
+    return <div>Загрузка ингредиентов...</div>;
+  }
+
+  const buns = ingredients.filter((item) => item.type === 'bun');
+  const mains = ingredients.filter((item) => item.type === 'main');
+  const sauces = ingredients.filter((item) => item.type === 'sauce');
 
   const onTabClick = (tab: string) => {
     setCurrentTab(tab as TTabMode);

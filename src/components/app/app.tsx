@@ -19,6 +19,7 @@ import {
   NotFound404
 } from '@pages';
 import { AppHeader, Modal, IngredientDetails, OrderInfo } from '@components';
+import { ProtectedRoute } from '../protected-route/protected-route';
 import '../../index.css';
 import styles from './app.module.css';
 import { FC } from 'react';
@@ -60,18 +61,72 @@ const App: FC = () => (
       <div className={styles.app}>
         <AppHeader />
         <Routes>
-          {/* Основные маршруты */}
+          {/* Публичные маршруты */}
           <Route path='/' element={<ConstructorPage />} />
-          <Route path='/login' element={<Login />} />
-          <Route path='/register' element={<Register />} />
-          <Route path='/forgot-password' element={<ForgotPassword />} />
-          <Route path='/reset-password' element={<ResetPassword />} />
-          <Route path='/profile' element={<Profile />} />
-          <Route path='/profile/orders' element={<ProfileOrders />} />
           <Route path='/feed' element={<Feed />} />
           <Route path='/ingredients/:id' element={<IngredientDetails />} />
           <Route path='/feed/:number' element={<OrderInfo />} />
-          <Route path='/profile/orders/:number' element={<OrderInfo />} />
+
+          {/* Защищенные маршруты - только для неавторизованных */}
+          <Route
+            path='/login'
+            element={
+              <ProtectedRoute onlyUnAuth>
+                <Login />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/register'
+            element={
+              <ProtectedRoute onlyUnAuth>
+                <Register />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/forgot-password'
+            element={
+              <ProtectedRoute onlyUnAuth>
+                <ForgotPassword />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/reset-password'
+            element={
+              <ProtectedRoute onlyUnAuth>
+                <ResetPassword />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Защищенные маршруты - только для авторизованных */}
+          <Route
+            path='/profile'
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/profile/orders'
+            element={
+              <ProtectedRoute>
+                <ProfileOrders />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/profile/orders/:number'
+            element={
+              <ProtectedRoute>
+                <OrderInfo />
+              </ProtectedRoute>
+            }
+          />
+
           <Route path='*' element={<NotFound404 />} />
 
           {/* Маршруты для модальных окон */}

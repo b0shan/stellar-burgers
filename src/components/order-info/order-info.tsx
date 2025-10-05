@@ -17,7 +17,6 @@ export const OrderInfo: FC = () => {
 
   const ingredients: TIngredient[] = [];
 
-  /* Готовим данные для отображения */
   const orderInfo = useMemo(() => {
     if (!orderData || !ingredients.length) return null;
 
