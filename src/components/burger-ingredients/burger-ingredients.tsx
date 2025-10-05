@@ -11,7 +11,6 @@ export const BurgerIngredients: FC = () => {
     (state) => state.burger.ingredients
   );
 
-  // Все хуки должны быть ВЫШЕ любых условных возвратов
   const [currentTab, setCurrentTab] = useState<TTabMode>('bun');
   const titleBunRef = useRef<HTMLHeadingElement>(null);
   const titleMainRef = useRef<HTMLHeadingElement>(null);
@@ -35,7 +34,6 @@ export const BurgerIngredients: FC = () => {
     }
   }, [inViewBuns, inViewFilling, inViewSauces]);
 
-  // Условные возвраты только ПОСЛЕ всех хуков
   if (loading) {
     return <div>Загрузка ингредиентов...</div>;
   }

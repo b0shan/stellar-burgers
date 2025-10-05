@@ -19,7 +19,6 @@ export const BurgerIngredient: FC<TBurgerIngredientProps> = memo(
       }
     };
 
-    // Добавляем обработчик клика для открытия модального окна
     const handleClick = () => {
       navigate(`/ingredients/${ingredient._id}`, {
         state: { background: location }
@@ -32,7 +31,6 @@ export const BurgerIngredient: FC<TBurgerIngredientProps> = memo(
         count={count}
         locationState={{ background: location }}
         handleAdd={handleAdd}
-        // Добавляем обработчик клика
         handleClick={handleClick}
       />
     );
