@@ -4,7 +4,7 @@ import {
   Routes,
   Route,
   useLocation,
-  useNavigate  // Добавляем этот импорт
+  useNavigate  
 } from 'react-router-dom';
 import store from '../../services/store';
 import {
@@ -29,7 +29,7 @@ import { getCookie } from '../../utils/cookie';
 
 // Компонент для модального окна с ингредиентом
 const IngredientModal: FC = () => {
-  const navigate = useNavigate();  // Теперь useNavigate доступен
+  const navigate = useNavigate();  
 
   const handleClose = () => {
     navigate(-1);
@@ -44,7 +44,7 @@ const IngredientModal: FC = () => {
 
 // Компонент для модального окна с заказом
 const OrderModal: FC = () => {
-  const navigate = useNavigate();  // И здесь тоже
+  const navigate = useNavigate();  
 
   const handleClose = () => {
     navigate(-1);
@@ -141,7 +141,6 @@ const AppContent: FC = () => {
         <Route path='*' element={<NotFound404 />} />
       </Routes>
 
-      {/* Маршруты для модальных окон - показываются только при background */}
       {background && (
         <Routes>
           <Route path='/ingredients/:id' element={<IngredientModal />} />
