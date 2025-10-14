@@ -4,7 +4,7 @@ import {
   Routes,
   Route,
   useLocation,
-  useNavigate
+  useNavigate  // Добавляем этот импорт
 } from 'react-router-dom';
 import store from '../../services/store';
 import {
@@ -22,12 +22,14 @@ import { AppHeader, Modal, IngredientDetails, OrderInfo } from '@components';
 import { ProtectedRoute } from '../protected-route/protected-route';
 import '../../index.css';
 import styles from './app.module.css';
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
+import { useDispatch } from '../../services/store';
+import { getUser } from '../../slices/burgerSlice';
+import { getCookie } from '../../utils/cookie';
 
 // Компонент для модального окна с ингредиентом
 const IngredientModal: FC = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate = useNavigate();  // Теперь useNavigate доступен
 
   const handleClose = () => {
     navigate(-1);
@@ -42,7 +44,7 @@ const IngredientModal: FC = () => {
 
 // Компонент для модального окна с заказом
 const OrderModal: FC = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate();  // И здесь тоже
 
   const handleClose = () => {
     navigate(-1);
@@ -55,89 +57,106 @@ const OrderModal: FC = () => {
   );
 };
 
+const AppContent: FC = () => {
+  const dispatch = useDispatch();
+  const location = useLocation();
+  const background = location.state?.background;
+
+  useEffect(() => {
+    if (getCookie('accessToken')) {
+      dispatch(getUser());
+    }
+  }, [dispatch]);
+
+  return (
+    <div className={styles.app}>
+      <AppHeader />
+      <Routes location={background || location}>
+        {/* Публичные маршруты */}
+        <Route path='/' element={<ConstructorPage />} />
+        <Route path='/feed' element={<Feed />} />
+        <Route path='/ingredients/:id' element={<IngredientDetails />} />
+        <Route path='/feed/:number' element={<OrderInfo />} />
+
+        {/* Защищенные маршруты - только для неавторизованных */}
+        <Route
+          path='/login'
+          element={
+            <ProtectedRoute onlyUnAuth>
+              <Login />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/register'
+          element={
+            <ProtectedRoute onlyUnAuth>
+              <Register />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/forgot-password'
+          element={
+            <ProtectedRoute onlyUnAuth>
+              <ForgotPassword />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/reset-password'
+          element={
+            <ProtectedRoute onlyUnAuth>
+              <ResetPassword />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Защищенные маршруты - только для авторизованных */}
+        <Route
+          path='/profile'
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/profile/orders'
+          element={
+            <ProtectedRoute>
+              <ProfileOrders />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/profile/orders/:number'
+          element={
+            <ProtectedRoute>
+              <OrderInfo />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route path='*' element={<NotFound404 />} />
+      </Routes>
+
+      {/* Маршруты для модальных окон - показываются только при background */}
+      {background && (
+        <Routes>
+          <Route path='/ingredients/:id' element={<IngredientModal />} />
+          <Route path='/feed/:number' element={<OrderModal />} />
+          <Route path='/profile/orders/:number' element={<OrderModal />} />
+        </Routes>
+      )}
+    </div>
+  );
+};
+
 const App: FC = () => (
   <Provider store={store}>
     <Router>
-      <div className={styles.app}>
-        <AppHeader />
-        <Routes>
-          {/* Публичные маршруты */}
-          <Route path='/' element={<ConstructorPage />} />
-          <Route path='/feed' element={<Feed />} />
-          <Route path='/ingredients/:id' element={<IngredientDetails />} />
-          <Route path='/feed/:number' element={<OrderInfo />} />
-
-          {/* Защищенные маршруты - только для неавторизованных */}
-          <Route
-            path='/login'
-            element={
-              <ProtectedRoute onlyUnAuth>
-                <Login />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path='/register'
-            element={
-              <ProtectedRoute onlyUnAuth>
-                <Register />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path='/forgot-password'
-            element={
-              <ProtectedRoute onlyUnAuth>
-                <ForgotPassword />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path='/reset-password'
-            element={
-              <ProtectedRoute onlyUnAuth>
-                <ResetPassword />
-              </ProtectedRoute>
-            }
-          />
-
-          {/* Защищенные маршруты - только для авторизованных */}
-          <Route
-            path='/profile'
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path='/profile/orders'
-            element={
-              <ProtectedRoute>
-                <ProfileOrders />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path='/profile/orders/:number'
-            element={
-              <ProtectedRoute>
-                <OrderInfo />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route path='*' element={<NotFound404 />} />
-
-          {/* Маршруты для модальных окон */}
-          <Route path='/ingredients/:id/modal' element={<IngredientModal />} />
-          <Route path='/feed/:number/modal' element={<OrderModal />} />
-          <Route
-            path='/profile/orders/:number/modal'
-            element={<OrderModal />}
-          />
-        </Routes>
-      </div>
+      <AppContent />
     </Router>
   </Provider>
 );

@@ -8,12 +8,10 @@ import { createOrder, clearOrder } from '../../slices/burgerSlice';
 export const BurgerConstructor: FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
+  
   const { bun, ingredients } = useSelector((state) => state.burger.constructor);
   const user = useSelector((state) => state.burger.user.data);
-  const { data: orderData, loading: orderRequest } = useSelector(
-    (state) => state.burger.order
-  );
+  const { data: orderData, loading: orderRequest } = useSelector((state) => state.burger.order);
 
   const constructorItems = {
     bun,
@@ -30,11 +28,10 @@ export const BurgerConstructor: FC = () => {
 
     const ingredientIds = [
       bun._id,
-      ...ingredients.map((ing) => ing._id),
+      ...ingredients.map(ing => ing._id),
       bun._id
     ];
 
-    console.log('Creating order with:', ingredientIds);
     dispatch(createOrder(ingredientIds));
   };
 
