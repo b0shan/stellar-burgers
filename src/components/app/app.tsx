@@ -4,7 +4,7 @@ import {
   Routes,
   Route,
   useLocation,
-  useNavigate  
+  useNavigate
 } from 'react-router-dom';
 import store from '../../services/store';
 import {
@@ -29,7 +29,7 @@ import { getCookie } from '../../utils/cookie';
 
 // Компонент для модального окна с ингредиентом
 const IngredientModal: FC = () => {
-  const navigate = useNavigate();  
+  const navigate = useNavigate();
 
   const handleClose = () => {
     navigate(-1);
@@ -44,7 +44,7 @@ const IngredientModal: FC = () => {
 
 // Компонент для модального окна с заказом
 const OrderModal: FC = () => {
-  const navigate = useNavigate();  
+  const navigate = useNavigate();
 
   const handleClose = () => {
     navigate(-1);
@@ -137,6 +137,14 @@ const AppContent: FC = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path='/profile/orders/:number/modal'
+          element={
+            <ProtectedRoute>
+              <OrderInfo />
+            </ProtectedRoute>
+          }
+        />
 
         <Route path='*' element={<NotFound404 />} />
       </Routes>
@@ -145,7 +153,12 @@ const AppContent: FC = () => {
         <Routes>
           <Route path='/ingredients/:id' element={<IngredientModal />} />
           <Route path='/feed/:number' element={<OrderModal />} />
+          <Route path='/feed/:number/modal' element={<OrderModal />} />
           <Route path='/profile/orders/:number' element={<OrderModal />} />
+          <Route
+            path='/profile/orders/:number/modal'
+            element={<OrderModal />}
+          />
         </Routes>
       )}
     </div>

@@ -1,7 +1,8 @@
-import { setCookie, getCookie } from './cookie';
+import { setCookie, getCookie, deleteCookie } from './cookie';
 import { TIngredient, TOrder, TOrdersData, TUser } from './types';
 
-const URL = process.env.BURGER_API_URL;
+const URL =
+  process.env.BURGER_API_URL || 'https://norma.nomoreparties.space/api';
 
 const checkResponse = <T>(res: Response): Promise<T> =>
   res.ok ? res.json() : res.json().then((err) => Promise.reject(err));
@@ -31,25 +32,42 @@ export const refreshToken = (): Promise<TRefreshResponse> =>
         return Promise.reject(refreshData);
       }
       localStorage.setItem('refreshToken', refreshData.refreshToken);
-      setCookie('accessToken', refreshData.accessToken);
+      setCookie('accessToken', refreshData.accessToken.split('Bearer ')[1]); // ИСПРАВЛЕНО
       return refreshData;
     });
 
 export const fetchWithRefresh = async <T>(
   url: RequestInfo,
-  options: RequestInit
-) => {
+  options: RequestInit = {}
+): Promise<T> => {
   try {
+    const accessToken = getCookie('accessToken');
+    if (accessToken) {
+      options.headers = {
+        ...options.headers,
+        Authorization: `Bearer ${accessToken}`
+      };
+    }
+
     const res = await fetch(url, options);
     return await checkResponse<T>(res);
   } catch (err) {
-    if ((err as { message: string }).message === 'jwt expired') {
+    const error = err as { message: string };
+    if (
+      error.message === 'jwt expired' ||
+      error.message === 'Invalid or missing token'
+    ) {
       const refreshData = await refreshToken();
-      if (options.headers) {
-        (options.headers as { [key: string]: string }).authorization =
-          refreshData.accessToken;
-      }
-      const res = await fetch(url, options);
+
+      const newOptions = {
+        ...options,
+        headers: {
+          ...options.headers,
+          Authorization: refreshData.accessToken
+        }
+      };
+
+      const res = await fetch(url, newOptions);
       return await checkResponse<T>(res);
     } else {
       return Promise.reject(err);
@@ -91,9 +109,8 @@ export const getOrdersApi = () =>
   fetchWithRefresh<TFeedsResponse>(`${URL}/orders`, {
     method: 'GET',
     headers: {
-      'Content-Type': 'application/json;charset=utf-8',
-      authorization: getCookie('accessToken')
-    } as HeadersInit
+      'Content-Type': 'application/json;charset=utf-8'
+    }
   }).then((data) => {
     if (data?.success) return data.orders;
     return Promise.reject(data);
@@ -108,9 +125,8 @@ export const orderBurgerApi = (data: string[]) =>
   fetchWithRefresh<TNewOrderResponse>(`${URL}/orders`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json;charset=utf-8',
-      authorization: getCookie('accessToken')
-    } as HeadersInit,
+      'Content-Type': 'application/json;charset=utf-8'
+    },
     body: JSON.stringify({
       ingredients: data
     })
@@ -153,7 +169,11 @@ export const registerUserApi = (data: TRegisterData) =>
   })
     .then((res) => checkResponse<TAuthResponse>(res))
     .then((data) => {
-      if (data?.success) return data;
+      if (data?.success) {
+        localStorage.setItem('refreshToken', data.refreshToken);
+        setCookie('accessToken', data.accessToken.split('Bearer ')[1]);
+        return data;
+      }
       return Promise.reject(data);
     });
 
@@ -172,7 +192,11 @@ export const loginUserApi = (data: TLoginData) =>
   })
     .then((res) => checkResponse<TAuthResponse>(res))
     .then((data) => {
-      if (data?.success) return data;
+      if (data?.success) {
+        localStorage.setItem('refreshToken', data.refreshToken);
+        setCookie('accessToken', data.accessToken.split('Bearer ')[1]);
+        return data;
+      }
       return Promise.reject(data);
     });
 
@@ -206,20 +230,22 @@ export const resetPasswordApi = (data: { password: string; token: string }) =>
 
 type TUserResponse = TServerResponse<{ user: TUser }>;
 
-export const getUserApi = () =>
+export const getUserApi = (): Promise<TUserResponse> =>
   fetchWithRefresh<TUserResponse>(`${URL}/auth/user`, {
+    method: 'GET',
     headers: {
-      authorization: getCookie('accessToken')
-    } as HeadersInit
+      'Content-Type': 'application/json;charset=utf-8'
+    }
   });
 
-export const updateUserApi = (user: Partial<TRegisterData>) =>
+export const updateUserApi = (
+  user: Partial<TRegisterData>
+): Promise<TUserResponse> =>
   fetchWithRefresh<TUserResponse>(`${URL}/auth/user`, {
     method: 'PATCH',
     headers: {
-      'Content-Type': 'application/json;charset=utf-8',
-      authorization: getCookie('accessToken')
-    } as HeadersInit,
+      'Content-Type': 'application/json;charset=utf-8'
+    },
     body: JSON.stringify(user)
   });
 

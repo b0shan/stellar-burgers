@@ -53,7 +53,7 @@ export const loginUser = createAsyncThunk(
   async (credentials: TLoginData) => {
     const response = await loginUserApi(credentials);
     localStorage.setItem('refreshToken', response.refreshToken);
-    setCookie('accessToken', response.accessToken);
+    setCookie('accessToken', response.accessToken.split('Bearer ')[1]);
     return response.user;
   }
 );
@@ -63,7 +63,7 @@ export const registerUser = createAsyncThunk(
   async (userData: TRegisterData) => {
     const response = await registerUserApi(userData);
     localStorage.setItem('refreshToken', response.refreshToken);
-    setCookie('accessToken', response.accessToken);
+    setCookie('accessToken', response.accessToken.split('Bearer ')[1]);
     return response.user;
   }
 );
@@ -74,16 +74,35 @@ export const logoutUser = createAsyncThunk('burger/logoutUser', async () => {
   deleteCookie('accessToken');
 });
 
-export const getUser = createAsyncThunk('burger/getUser', async () => {
-  const response = await getUserApi();
-  return response.user;
-});
+export const getUser = createAsyncThunk(
+  'burger/getUser',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await getUserApi();
+      return response.user;
+    } catch (error) {
+      if (
+        (error as any)?.message?.includes('jwt expired') ||
+        (error as any)?.message?.includes('403') ||
+        (error as any)?.message?.includes('401')
+      ) {
+        deleteCookie('accessToken');
+        localStorage.removeItem('refreshToken');
+      }
+      return rejectWithValue(error);
+    }
+  }
+);
 
 export const updateUser = createAsyncThunk(
   'burger/updateUser',
-  async (userData: Partial<TRegisterData>) => {
-    const response = await updateUserApi(userData);
-    return response.user;
+  async (userData: Partial<TRegisterData>, { rejectWithValue }) => {
+    try {
+      const response = await updateUserApi(userData);
+      return response.user;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
   }
 );
 
@@ -179,6 +198,7 @@ const burgerSlice = createSlice({
     },
     clearUser: (state) => {
       state.user.data = null;
+      state.user.error = null;
     },
     clearOrder: (state) => {
       state.order.data = null;
@@ -191,10 +211,18 @@ const burgerSlice = createSlice({
     clearFeed: (state) => {
       state.feed.data = [];
       state.feed.error = null;
+    },
+    clearError: (state) => {
+      state.user.error = null;
+      state.order.error = null;
+      state.userOrders.error = null;
+      state.feed.error = null;
+      state.ingredients.error = null;
     }
   },
   extraReducers: (builder) => {
     builder
+
       .addCase(fetchIngredients.pending, (state) => {
         state.ingredients.loading = true;
         state.ingredients.error = null;
@@ -205,8 +233,10 @@ const burgerSlice = createSlice({
       })
       .addCase(fetchIngredients.rejected, (state, action) => {
         state.ingredients.loading = false;
-        state.ingredients.error = action.error.message || 'Ошибка загрузки';
+        state.ingredients.error =
+          action.error.message || 'Ошибка загрузки ингредиентов';
       })
+
       .addCase(createOrder.pending, (state) => {
         state.order.loading = true;
         state.order.error = null;
@@ -221,6 +251,7 @@ const burgerSlice = createSlice({
         state.order.loading = false;
         state.order.error = action.error.message || 'Ошибка создания заказа';
       })
+
       .addCase(fetchUserOrders.pending, (state) => {
         state.userOrders.loading = true;
         state.userOrders.error = null;
@@ -234,6 +265,7 @@ const burgerSlice = createSlice({
         state.userOrders.error =
           action.error.message || 'Ошибка загрузки заказов';
       })
+
       .addCase(fetchFeed.pending, (state) => {
         state.feed.loading = true;
         state.feed.error = null;
@@ -249,6 +281,7 @@ const burgerSlice = createSlice({
         state.feed.error =
           action.error.message || 'Ошибка загрузки ленты заказов';
       })
+
       .addCase(loginUser.pending, (state) => {
         state.user.loading = true;
         state.user.error = null;
@@ -256,11 +289,13 @@ const burgerSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action) => {
         state.user.data = action.payload;
         state.user.loading = false;
+        state.user.error = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.user.loading = false;
         state.user.error = action.error.message || 'Ошибка авторизации';
       })
+
       .addCase(registerUser.pending, (state) => {
         state.user.loading = true;
         state.user.error = null;
@@ -268,24 +303,62 @@ const burgerSlice = createSlice({
       .addCase(registerUser.fulfilled, (state, action) => {
         state.user.data = action.payload;
         state.user.loading = false;
+        state.user.error = null;
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.user.loading = false;
         state.user.error = action.error.message || 'Ошибка регистрации';
+      })
+
+      .addCase(logoutUser.pending, (state) => {
+        state.user.loading = true;
       })
       .addCase(logoutUser.fulfilled, (state) => {
         state.user.data = null;
         state.user.loading = false;
         state.user.error = null;
         state.userOrders.data = [];
+        state.constructor.bun = null;
+        state.constructor.ingredients = [];
+      })
+      .addCase(logoutUser.rejected, (state, action) => {
+        state.user.loading = false;
+        state.user.error = action.error.message || 'Ошибка выхода';
+        state.user.data = null;
+        state.userOrders.data = [];
+      })
+
+      .addCase(getUser.pending, (state) => {
+        state.user.loading = true;
+        state.user.error = null;
       })
       .addCase(getUser.fulfilled, (state, action) => {
         state.user.data = action.payload;
         state.user.loading = false;
+        state.user.error = null;
       })
-      .addCase(getUser.rejected, (state) => {
-        state.user.data = null;
+      .addCase(getUser.rejected, (state, action: any) => {
+        state.user.loading = false;
+        state.user.error =
+          action.payload?.message ||
+          action.error?.message ||
+          'Ошибка загрузки пользователя';
+
+        // Очищаем пользователя и токены при ошибках
+        if (
+          action.payload?.message?.includes('jwt expired') ||
+          action.payload?.message?.includes('403') ||
+          action.payload?.message?.includes('401') ||
+          action.error?.message?.includes('jwt') ||
+          action.error?.message?.includes('403') ||
+          action.error?.message?.includes('401')
+        ) {
+          state.user.data = null;
+          deleteCookie('accessToken');
+          localStorage.removeItem('refreshToken');
+        }
       })
+
       .addCase(updateUser.pending, (state) => {
         state.user.loading = true;
         state.user.error = null;
@@ -293,10 +366,25 @@ const burgerSlice = createSlice({
       .addCase(updateUser.fulfilled, (state, action) => {
         state.user.data = action.payload;
         state.user.loading = false;
+        state.user.error = null;
       })
-      .addCase(updateUser.rejected, (state, action) => {
+      .addCase(updateUser.rejected, (state, action: any) => {
         state.user.loading = false;
-        state.user.error = action.error.message || 'Ошибка обновления данных';
+        state.user.error =
+          action.payload?.message ||
+          action.error?.message ||
+          'Ошибка обновления данных';
+
+        // Очищаем пользователя при ошибках
+        if (
+          action.payload?.message?.includes('jwt expired') ||
+          action.payload?.message?.includes('403') ||
+          action.payload?.message?.includes('401')
+        ) {
+          state.user.data = null;
+          deleteCookie('accessToken');
+          localStorage.removeItem('refreshToken');
+        }
       });
   }
 });
@@ -310,7 +398,8 @@ export const {
   clearUser,
   clearOrder,
   clearUserOrders,
-  clearFeed
+  clearFeed,
+  clearError
 } = burgerSlice.actions;
 
 export default burgerSlice.reducer;
