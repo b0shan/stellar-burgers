@@ -24,7 +24,7 @@ import '../../index.css';
 import styles from './app.module.css';
 import { FC, useEffect } from 'react';
 import { useDispatch } from '../../services/store';
-import { getUser } from '../../slices/burgerSlice';
+import { getUser, fetchIngredients } from '../../slices/burgerSlice';
 import { getCookie } from '../../utils/cookie';
 
 // Компонент для модального окна с ингредиентом
@@ -62,7 +62,13 @@ const AppContent: FC = () => {
   const location = useLocation();
   const background = location.state?.background;
 
+  console.log('AppContent render - path:', location.pathname);
+
   useEffect(() => {
+    console.log('AppContent useEffect - initial load');
+
+    dispatch(fetchIngredients());
+
     if (getCookie('accessToken')) {
       dispatch(getUser());
     }
