@@ -3,7 +3,6 @@ import { useInView } from 'react-intersection-observer';
 import { useSelector, useDispatch } from '../../services/store';
 import { TTabMode } from '@utils-types';
 import { BurgerIngredientsUI } from '../ui/burger-ingredients';
-import { fetchIngredients } from '../../slices/burgerSlice';
 
 export const BurgerIngredients: FC = () => {
   const dispatch = useDispatch();
@@ -19,10 +18,6 @@ export const BurgerIngredients: FC = () => {
   const [bunsRef, inViewBuns] = useInView({ threshold: 0 });
   const [mainsRef, inViewFilling] = useInView({ threshold: 0 });
   const [saucesRef, inViewSauces] = useInView({ threshold: 0 });
-
-  useEffect(() => {
-    dispatch(fetchIngredients());
-  }, [dispatch]);
 
   useEffect(() => {
     if (inViewBuns) {

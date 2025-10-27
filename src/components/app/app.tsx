@@ -144,7 +144,7 @@ const AppContent: FC = () => {
           }
         />
         <Route
-          path='/profile/orders/:number/modal'
+          path='/profile/orders/:number'
           element={
             <ProtectedRoute>
               <OrderInfo />

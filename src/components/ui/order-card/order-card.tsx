@@ -16,9 +16,9 @@ export const OrderCardUI: FC<OrderCardUIProps> = memo(
 
     const getModalPath = () => {
       if (location.pathname.includes('/profile/orders')) {
-        return `/profile/orders/${orderInfo.number}/modal`;
+        return `/profile/orders/${orderInfo.number}`;
       } else if (location.pathname.includes('/feed')) {
-        return `/feed/${orderInfo.number}/modal`;
+        return `/feed/${orderInfo.number}`;
       }
       return orderInfo.number.toString();
     };
@@ -29,7 +29,6 @@ export const OrderCardUI: FC<OrderCardUIProps> = memo(
         state={locationState}
         className={`p-6 mb-4 mr-2 ${styles.order}`}
       >
-        {/* остальное содержимое без изменений */}
         <div className={styles.order_info}>
           <span className={`text text_type_digits-default ${styles.number}`}>
             #{String(orderInfo.number).padStart(6, '0')}
