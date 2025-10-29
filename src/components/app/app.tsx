@@ -27,7 +27,7 @@ import { useDispatch } from '../../services/store';
 import { getUser, fetchIngredients } from '../../slices/burgerSlice';
 import { getCookie } from '../../utils/cookie';
 
-// Компонент для модального окна с ингредиентом
+// Универсальный компонент для модального окна с ингредиентом
 const IngredientModal: FC = () => {
   const navigate = useNavigate();
 
@@ -42,11 +42,13 @@ const IngredientModal: FC = () => {
   );
 };
 
-// Компонент для модального окна с заказом
+// Универсальный компонент для модального окна с заказом
 const OrderModal: FC = () => {
   const navigate = useNavigate();
 
   const handleClose = () => {
+    sessionStorage.removeItem('lastViewedOrder');
+    sessionStorage.removeItem('lastViewedOrderPath');
     navigate(-1);
   };
 
@@ -60,23 +62,48 @@ const OrderModal: FC = () => {
 const AppContent: FC = () => {
   const dispatch = useDispatch();
   const location = useLocation();
+  const navigate = useNavigate();
   const background = location.state?.background;
 
-  console.log('AppContent render - path:', location.pathname);
-
   useEffect(() => {
-    console.log('AppContent useEffect - initial load');
-
     dispatch(fetchIngredients());
 
     if (getCookie('accessToken')) {
       dispatch(getUser());
     }
-  }, [dispatch]);
+
+    if (!background) {
+      const lastOrderNumber = sessionStorage.getItem('lastViewedOrder');
+      const lastOrderPath = sessionStorage.getItem('lastViewedOrderPath');
+
+      if (lastOrderNumber && lastOrderPath) {
+        const currentPath = location.pathname;
+        const isOnFeed = currentPath === '/feed';
+        const isOnProfileOrders = currentPath === '/profile/orders';
+        const wasOnFeed = lastOrderPath === '/feed';
+        const wasOnProfileOrders = lastOrderPath === '/profile/orders';
+
+        if (
+          (isOnFeed && wasOnFeed) ||
+          (isOnProfileOrders && wasOnProfileOrders)
+        ) {
+          const modalPath = wasOnFeed
+            ? `/feed/${lastOrderNumber}`
+            : `/profile/orders/${lastOrderNumber}`;
+
+          navigate(modalPath, {
+            state: { background: location }
+          });
+        }
+      }
+    }
+  }, [dispatch, navigate, location, background]);
 
   return (
     <div className={styles.app}>
       <AppHeader />
+
+      {/* Основные маршруты */}
       <Routes location={background || location}>
         {/* Публичные маршруты */}
         <Route path='/' element={<ConstructorPage />} />
@@ -143,14 +170,6 @@ const AppContent: FC = () => {
             </ProtectedRoute>
           }
         />
-        <Route
-          path='/profile/orders/:number'
-          element={
-            <ProtectedRoute>
-              <OrderInfo />
-            </ProtectedRoute>
-          }
-        />
 
         <Route path='*' element={<NotFound404 />} />
       </Routes>
@@ -159,12 +178,7 @@ const AppContent: FC = () => {
         <Routes>
           <Route path='/ingredients/:id' element={<IngredientModal />} />
           <Route path='/feed/:number' element={<OrderModal />} />
-          <Route path='/feed/:number/modal' element={<OrderModal />} />
           <Route path='/profile/orders/:number' element={<OrderModal />} />
-          <Route
-            path='/profile/orders/:number/modal'
-            element={<OrderModal />}
-          />
         </Routes>
       )}
     </div>

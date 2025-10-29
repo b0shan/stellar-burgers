@@ -1,5 +1,10 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
-import { TIngredient, TUser, TOrder } from '@utils-types';
+import {
+  TIngredient,
+  TUser,
+  TOrder,
+  TConstructorIngredient
+} from '@utils-types';
 import {
   getIngredientsApi,
   loginUserApi,
@@ -14,6 +19,9 @@ import {
   TRegisterData
 } from '@api';
 import { setCookie, getCookie, deleteCookie } from '../utils/cookie';
+
+const generateUniqueId = (): string =>
+  Date.now().toString(36) + Math.random().toString(36).slice(2);
 
 export const fetchIngredients = createAsyncThunk(
   'burger/fetchIngredients',
@@ -114,7 +122,7 @@ type BurgerState = {
   };
   constructor: {
     bun: TIngredient | null;
-    ingredients: TIngredient[];
+    ingredients: TConstructorIngredient[];
   };
   user: {
     data: TUser | null;
@@ -181,13 +189,31 @@ const burgerSlice = createSlice({
     addBun: (state, action: PayloadAction<TIngredient>) => {
       state.constructor.bun = action.payload;
     },
-    addIngredient: (state, action: PayloadAction<TIngredient>) => {
-      state.constructor.ingredients.push(action.payload);
+    addIngredient: {
+      prepare: (ingredient: TIngredient) => ({
+        payload: {
+          ...ingredient,
+          id: generateUniqueId()
+        }
+      }),
+      reducer: (state, action: PayloadAction<TConstructorIngredient>) => {
+        state.constructor.ingredients.push(action.payload);
+      }
     },
     removeIngredient: (state, action: PayloadAction<string>) => {
       state.constructor.ingredients = state.constructor.ingredients.filter(
-        (_, index) => index !== Number(action.payload)
+        (item) => item.id !== action.payload
       );
+    },
+    moveIngredient: (
+      state,
+      action: PayloadAction<{ fromIndex: number; toIndex: number }>
+    ) => {
+      const { fromIndex, toIndex } = action.payload;
+      const ingredients = [...state.constructor.ingredients];
+      const [movedItem] = ingredients.splice(fromIndex, 1);
+      ingredients.splice(toIndex, 0, movedItem);
+      state.constructor.ingredients = ingredients;
     },
     clearConstructor: (state) => {
       state.constructor.bun = null;
@@ -222,7 +248,6 @@ const burgerSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-
       .addCase(fetchIngredients.pending, (state) => {
         state.ingredients.loading = true;
         state.ingredients.error = null;
@@ -344,7 +369,6 @@ const burgerSlice = createSlice({
           action.error?.message ||
           'Ошибка загрузки пользователя';
 
-        // Очищаем пользователя и токены при ошибках
         if (
           action.payload?.message?.includes('jwt expired') ||
           action.payload?.message?.includes('403') ||
@@ -375,7 +399,6 @@ const burgerSlice = createSlice({
           action.error?.message ||
           'Ошибка обновления данных';
 
-        // Очищаем пользователя при ошибках
         if (
           action.payload?.message?.includes('jwt expired') ||
           action.payload?.message?.includes('403') ||
@@ -393,6 +416,7 @@ export const {
   addBun,
   addIngredient,
   removeIngredient,
+  moveIngredient,
   clearConstructor,
   setUser,
   clearUser,

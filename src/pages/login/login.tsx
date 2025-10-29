@@ -19,7 +19,6 @@ export const Login: FC = () => {
     dispatch(loginUser({ email, password }));
   };
 
-  // Редирект после успешной авторизации
   useEffect(() => {
     if (user) {
       const from = location.state?.from || { pathname: '/' };

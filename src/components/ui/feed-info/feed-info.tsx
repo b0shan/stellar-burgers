@@ -7,7 +7,6 @@ export const FeedInfoUI: FC<FeedInfoUIProps> = memo(
   ({ feed, readyOrders, pendingOrders }) => {
     const { total, totalToday } = feed;
 
-    // Если нет данных, показываем прелоадер
     if (
       !readyOrders.length &&
       !pendingOrders.length &&

@@ -1,4 +1,3 @@
-// pages/reset-password.tsx
 import { FC, useState, SyntheticEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ResetPasswordUI } from '@ui-pages';

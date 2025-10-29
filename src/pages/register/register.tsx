@@ -20,7 +20,6 @@ export const Register: FC = () => {
     dispatch(registerUser({ email, password, name: userName }));
   };
 
-  // Редирект после успешной регистрации
   useEffect(() => {
     if (user) {
       const from = location.state?.from || { pathname: '/' };

@@ -1,5 +1,5 @@
 import React, { FC, memo } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   CurrencyIcon,
   FormattedDate
@@ -9,25 +9,42 @@ import styles from './order-card.module.css';
 
 import { OrderCardUIProps } from './type';
 import { OrderStatus } from '@components';
+import { usePopupPersistence } from '../../../utils/usePopupPersistence';
 
 export const OrderCardUI: FC<OrderCardUIProps> = memo(
   ({ orderInfo, maxIngredients, locationState }) => {
     const location = useLocation();
+    const navigate = useNavigate();
+    const { savePopupState } = usePopupPersistence('order');
 
-    const getModalPath = () => {
+    const handleClick = (e: React.MouseEvent) => {
+      if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+        sessionStorage.setItem('lastViewedOrder', orderInfo.number.toString());
+        sessionStorage.setItem('lastViewedOrderPath', location.pathname);
+
+        const orderPath = location.pathname.includes('/profile/orders')
+          ? `/profile/orders/${orderInfo.number}`
+          : `/feed/${orderInfo.number}`;
+
+        navigate(orderPath, { state: { background: location } });
+        e.preventDefault();
+      }
+    };
+
+    const getPagePath = () => {
       if (location.pathname.includes('/profile/orders')) {
         return `/profile/orders/${orderInfo.number}`;
-      } else if (location.pathname.includes('/feed')) {
+      } else {
         return `/feed/${orderInfo.number}`;
       }
-      return orderInfo.number.toString();
     };
 
     return (
       <Link
-        to={getModalPath()}
+        to={getPagePath()}
         state={locationState}
         className={`p-6 mb-4 mr-2 ${styles.order}`}
+        onClick={handleClick}
       >
         <div className={styles.order_info}>
           <span className={`text text_type_digits-default ${styles.number}`}>
