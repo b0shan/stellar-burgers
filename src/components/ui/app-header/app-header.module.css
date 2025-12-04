@@ -1,6 +1,7 @@
 .header {
   background-color: var(--background);
 }
+
 .menu {
   display: flex;
   align-items: center;
@@ -12,15 +13,30 @@
 .menu_part_left {
   display: flex;
   flex-basis: 35%;
+  gap: 8px;
 }
 
 .link {
   display: flex;
+  align-items: center;
   text-decoration: none;
   color: var(--text-inactive-color);
+  padding: 16px 20px;
+  border-radius: 40px;
+  transition: all 0.3s ease;
+}
+
+.link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-inactive-color);
+  text-decoration: none;
 }
 
 .link_active {
+  color: var(--text-primary-color);
+}
+
+.link_active p {
   color: var(--text-primary-color);
 }
 
@@ -34,4 +50,12 @@
   display: flex;
   align-items: center;
   margin: 0 auto;
+}
+
+/* Убираем любые подчеркивания */
+.link:focus,
+.link:active,
+.link:visited {
+  text-decoration: none;
+  outline: none;
 }

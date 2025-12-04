@@ -1,13 +1,24 @@
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { Preloader } from '../ui/preloader';
 import { IngredientDetailsUI } from '../ui/ingredient-details';
+import { useSelector, useDispatch } from '../../services/store';
 
 export const IngredientDetails: FC = () => {
-  /** TODO: взять переменную из стора */
-  const ingredientData = null;
+  const { id } = useParams<{ id: string }>();
+  const dispatch = useDispatch();
+  const { data: ingredients, loading } = useSelector(
+    (state) => state.burger.ingredients
+  );
+
+  const ingredientData = ingredients.find((item) => item._id === id);
+
+  if (loading) {
+    return <Preloader />;
+  }
 
   if (!ingredientData) {
-    return <Preloader />;
+    return <div>Ингредиент не найден</div>;
   }
 
   return <IngredientDetailsUI ingredientData={ingredientData} />;

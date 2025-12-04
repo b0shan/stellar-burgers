@@ -1,12 +1,20 @@
 import React, { FC, memo } from 'react';
-
+import { Preloader } from '@ui';
 import styles from './feed-info.module.css';
-
 import { FeedInfoUIProps, HalfColumnProps, TColumnProps } from './type';
 
 export const FeedInfoUI: FC<FeedInfoUIProps> = memo(
   ({ feed, readyOrders, pendingOrders }) => {
     const { total, totalToday } = feed;
+
+    if (
+      !readyOrders.length &&
+      !pendingOrders.length &&
+      total === 0 &&
+      totalToday === 0
+    ) {
+      return <Preloader />;
+    }
 
     return (
       <section>
