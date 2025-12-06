@@ -14,7 +14,7 @@ export const BurgerConstructorElementUI: FC<BurgerConstructorElementUIProps> =
       handleMoveDown,
       handleClose
     }) => (
-      <li 
+      <li
         className={`${styles.element} mb-4 mr-2`}
         data-testid={`constructor-item-${ingredient._id}`}
       >
@@ -25,7 +25,7 @@ export const BurgerConstructorElementUI: FC<BurgerConstructorElementUIProps> =
           isDownDisabled={index === totalItems - 1}
           data-testid={`move-buttons-${index}`}
         />
-        <div 
+        <div
           className={`${styles.element_fullwidth} ml-2`}
           data-testid={`constructor-element-${index}`}
         >

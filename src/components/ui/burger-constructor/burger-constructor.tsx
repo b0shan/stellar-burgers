@@ -18,14 +18,14 @@ export const BurgerConstructorUI: FC<BurgerConstructorUIProps> = ({
   onOrderClick,
   closeOrderModal
 }) => (
-  <section 
+  <section
     className={styles.burger_constructor}
-    data-testid="constructor-section"
+    data-testid='constructor-section'
   >
     {constructorItems.bun ? (
-      <div 
+      <div
         className={`${styles.element} mb-4 mr-4`}
-        data-testid="constructor-bun-top"
+        data-testid='constructor-bun-top'
       >
         <ConstructorElement
           type='top'
@@ -33,21 +33,21 @@ export const BurgerConstructorUI: FC<BurgerConstructorUIProps> = ({
           text={`${constructorItems.bun.name} (верх)`}
           price={constructorItems.bun.price}
           thumbnail={constructorItems.bun.image}
-          data-testid="bun-top-element"
+          data-testid='bun-top-element'
         />
       </div>
     ) : (
       <div
         className={`${styles.noBuns} ${styles.noBunsTop} ml-8 mb-4 mr-5 text text_type_main-default`}
-        data-testid="empty-bun-top"
+        data-testid='empty-bun-top'
       >
         Выберите булки
       </div>
     )}
-    
-    <ul 
+
+    <ul
       className={styles.elements}
-      data-testid="constructor-fillings-container"
+      data-testid='constructor-fillings-container'
     >
       {constructorItems.ingredients.length > 0 ? (
         constructorItems.ingredients.map(
@@ -64,17 +64,17 @@ export const BurgerConstructorUI: FC<BurgerConstructorUIProps> = ({
       ) : (
         <div
           className={`${styles.noBuns} ml-8 mb-4 mr-5 text text_type_main-default`}
-          data-testid="empty-fillings"
+          data-testid='empty-fillings'
         >
           Выберите начинку
         </div>
       )}
     </ul>
-    
+
     {constructorItems.bun ? (
-      <div 
+      <div
         className={`${styles.element} mt-4 mr-4`}
-        data-testid="constructor-bun-bottom"
+        data-testid='constructor-bun-bottom'
       >
         <ConstructorElement
           type='bottom'
@@ -82,30 +82,24 @@ export const BurgerConstructorUI: FC<BurgerConstructorUIProps> = ({
           text={`${constructorItems.bun.name} (низ)`}
           price={constructorItems.bun.price}
           thumbnail={constructorItems.bun.image}
-          data-testid="bun-bottom-element"
+          data-testid='bun-bottom-element'
         />
       </div>
     ) : (
       <div
         className={`${styles.noBuns} ${styles.noBunsBottom} ml-8 mb-4 mr-5 text text_type_main-default`}
-        data-testid="empty-bun-bottom"
+        data-testid='empty-bun-bottom'
       >
         Выберите булки
       </div>
     )}
-    
-    <div 
-      className={`${styles.total} mt-10 mr-4`}
-      data-testid="order-summary"
-    >
-      <div 
+
+    <div className={`${styles.total} mt-10 mr-4`} data-testid='order-summary'>
+      <div
         className={`${styles.cost} mr-10`}
-        data-testid="total-price-container"
+        data-testid='total-price-container'
       >
-        <p 
-          className={`text ${styles.text} mr-2`}
-          data-testid="total-price"
-        >
+        <p className={`text ${styles.text} mr-2`} data-testid='total-price'>
           {price}
         </p>
         <CurrencyIcon type='primary' />
@@ -116,16 +110,18 @@ export const BurgerConstructorUI: FC<BurgerConstructorUIProps> = ({
         size='large'
         children='Оформить заказ'
         onClick={onOrderClick}
-        disabled={!constructorItems.bun || constructorItems.ingredients.length === 0}
-        data-testid="order-button"
+        disabled={
+          !constructorItems.bun || constructorItems.ingredients.length === 0
+        }
+        data-testid='order-button'
       />
     </div>
 
     {orderRequest && (
-      <Modal 
-        onClose={closeOrderModal} 
+      <Modal
+        onClose={closeOrderModal}
         title={'Оформляем заказ...'}
-        data-testid="order-loading-modal"
+        data-testid='order-loading-modal'
       >
         <Preloader />
       </Modal>
@@ -135,7 +131,7 @@ export const BurgerConstructorUI: FC<BurgerConstructorUIProps> = ({
       <Modal
         onClose={closeOrderModal}
         title={orderRequest ? 'Оформляем заказ...' : ''}
-        data-testid="order-details-modal"
+        data-testid='order-details-modal'
       >
         <OrderDetailsUI orderNumber={orderModalData.number} />
       </Modal>
