@@ -1,28 +1,25 @@
+import { describe, test, expect } from '@jest/globals';
 import store from '../../src/services/store';
 import type { RootState } from '../../src/services/store';
-import { describe, test, expect } from '@jest/globals';
 
 describe('rootReducer инициализация', () => {
-  test('Проверка правильной инициализации rootReducer', () => {
-    const initialState: RootState = store.getState();
+  test('корректное начальное состояние', () => {
+    const state: RootState = store.getState();
 
-    // Constructor
-    expect(initialState.burger.constructor.bun).toBeNull();
-    expect(initialState.burger.constructor.ingredients).toEqual([]);
+    expect(state.burger.constructor.bun).toBeNull();
+    expect(state.burger.constructor.ingredients).toEqual([]);
 
-    // Ingredients
-    expect(initialState.burger.ingredients.data).toEqual([]);
-    expect(initialState.burger.ingredients.loading).toBe(false);
-    expect(initialState.burger.ingredients.error).toBeNull();
+    expect(state.burger.ingredients.data).toEqual([]);
+    expect(state.burger.ingredients.loading).toBe(false);
+    expect(state.burger.ingredients.error).toBeNull();
 
-    // Order
-    expect(initialState.burger.order.data).toBeNull();
-    expect(initialState.burger.order.loading).toBe(false);
-    expect(initialState.burger.order.error).toBeNull();
+    expect(state.burger.order.data).toBeNull();
+    expect(state.burger.order.loading).toBe(false);
+    expect(state.burger.order.error).toBeNull();
 
-    // User
-    expect(initialState.burger.user.data).toBeNull();
-    expect(initialState.burger.user.loading).toBe(false);
-    expect(initialState.burger.user.error).toBeNull();
+    expect(state.burger.user.data).toBeNull();
+    expect(state.burger.user.loading).toBe(false);
+    expect(state.burger.user.error).toBeNull();
   });
 });
+
