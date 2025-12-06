@@ -425,5 +425,6 @@ export const {
   clearFeed,
   clearError
 } = burgerSlice.actions;
+export { initialState };
 
 export default burgerSlice.reducer;
