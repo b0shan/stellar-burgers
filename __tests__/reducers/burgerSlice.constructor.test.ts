@@ -1,3 +1,4 @@
+<<<<<<< HEAD:__tests__/reducers/burgerSlice.constructor.test.ts
 <<<<<<< HEAD
 import { describe, test, expect, jest } from '@jest/globals';
 import burgerReducer, {
@@ -27,6 +28,8 @@ describe('burger reducer - constructor часть', () => {
     image_large: '',
     image_mobile: '',
 =======
+=======
+>>>>>>> bb72752 (done):tests/reducers/burgerSlice.constructor.test.ts
 import { describe, test, expect } from '@jest/globals';
 import burgerReducer, { initialState } from '../../src/slices/burgerSlice';
 import type { TIngredient, TConstructorIngredient } from '../../src/utils/types';
@@ -46,11 +49,15 @@ describe('burgerSlice - constructor слайс', () => {
     carbohydrates: 20,
     image_large: '',
     image_mobile: ''
+<<<<<<< HEAD:__tests__/reducers/burgerSlice.constructor.test.ts
 >>>>>>> bb72752 (done)
+=======
+>>>>>>> bb72752 (done):tests/reducers/burgerSlice.constructor.test.ts
   };
 
   const mockFilling1: TIngredient = {
     _id: 'filling-1',
+<<<<<<< HEAD:__tests__/reducers/burgerSlice.constructor.test.ts
 <<<<<<< HEAD
     name: 'Биокотлета',
     type: 'main',
@@ -63,6 +70,8 @@ describe('burgerSlice - constructor слайс', () => {
     image_large: '',
     image_mobile: '',
 =======
+=======
+>>>>>>> bb72752 (done):tests/reducers/burgerSlice.constructor.test.ts
     name: 'Начинка 1',
     type: 'main',
     price: 150,
@@ -73,11 +82,15 @@ describe('burgerSlice - constructor слайс', () => {
     carbohydrates: 10,
     image_large: '',
     image_mobile: ''
+<<<<<<< HEAD:__tests__/reducers/burgerSlice.constructor.test.ts
 >>>>>>> bb72752 (done)
+=======
+>>>>>>> bb72752 (done):tests/reducers/burgerSlice.constructor.test.ts
   };
 
   const mockFilling2: TIngredient = {
     _id: 'filling-2',
+<<<<<<< HEAD:__tests__/reducers/burgerSlice.constructor.test.ts
 <<<<<<< HEAD
     name: 'Сыр',
     type: 'main',
@@ -138,6 +151,8 @@ describe('burgerSlice - constructor слайс', () => {
     expect(state.constructor.ingredients[0]._id).toBe('filling-2');
     expect(state.constructor.ingredients[1]._id).toBe('filling-1');
 =======
+=======
+>>>>>>> bb72752 (done):tests/reducers/burgerSlice.constructor.test.ts
     name: 'Начинка 2',
     type: 'main',
     price: 100,
@@ -215,6 +230,9 @@ describe('burgerSlice - constructor слайс', () => {
     const state = burgerReducer(startState, action);
     expect(state.constructor.bun).toBeNull();
     expect(state.constructor.ingredients).toEqual([]);
+<<<<<<< HEAD:__tests__/reducers/burgerSlice.constructor.test.ts
 >>>>>>> bb72752 (done)
+=======
+>>>>>>> bb72752 (done):tests/reducers/burgerSlice.constructor.test.ts
   });
 });
