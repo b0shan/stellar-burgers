@@ -114,7 +114,7 @@ export const updateUser = createAsyncThunk(
   }
 );
 
-type BurgerState = {
+export type BurgerState = {
   ingredients: {
     data: TIngredient[];
     loading: boolean;
@@ -426,5 +426,6 @@ export const {
   clearError
 } = burgerSlice.actions;
 export { initialState };
+export type { TIngredient, TUser, TOrder, TConstructorIngredient } from '@utils-types';
 
 export default burgerSlice.reducer;
