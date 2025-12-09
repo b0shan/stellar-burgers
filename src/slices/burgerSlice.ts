@@ -426,6 +426,11 @@ export const {
   clearError
 } = burgerSlice.actions;
 export { initialState };
-export type { TIngredient, TUser, TOrder, TConstructorIngredient } from '@utils-types';
+export type {
+  TIngredient,
+  TUser,
+  TOrder,
+  TConstructorIngredient
+} from '@utils-types';
 
 export default burgerSlice.reducer;

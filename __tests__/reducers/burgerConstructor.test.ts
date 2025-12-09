@@ -1,23 +1,20 @@
 import { describe, test, expect } from '@jest/globals';
-import reducer, {
+import burgerReducer, {
   addBun,
   addIngredient,
   removeIngredient,
   moveIngredient,
   clearConstructor,
+  initialState
 } from '../../src/slices/burgerSlice';
-import type { BurgerState, TIngredient, TConstructorIngredient } from '../../src/slices/burgerSlice';
+import type { TIngredient, TConstructorIngredient } from '../../src/utils/types';
+
+// Мок для uuid 
+jest.mock('uuid', () => ({
+  v4: jest.fn(() => 'test-uuid')
+}));
 
 describe('burgerConstructor reducer', () => {
-  const initialState: BurgerState = {
-    ingredients: { data: [], loading: false, error: null },
-    constructor: { bun: null, ingredients: [] },
-    user: { data: null, loading: false, error: null },
-    order: { data: null, loading: false, error: null },
-    userOrders: { data: [], loading: false, error: null },
-    feed: { data: [], total: 0, totalToday: 0, loading: false, error: null },
-  };
-
   const mockBun: TIngredient = {
     _id: 'bun1',
     name: 'Краторная булка',
@@ -34,7 +31,7 @@ describe('burgerConstructor reducer', () => {
 
   const mockIngredient: TIngredient = {
     _id: 'main1',
-    name: 'Котлета',
+    name: 'Бифкетти',
     type: 'main',
     proteins: 20,
     fat: 15,
@@ -46,49 +43,85 @@ describe('burgerConstructor reducer', () => {
     image_large: '',
   };
 
-  test('addBun устанавливает булку', () => {
-    const state = reducer(initialState, addBun(mockBun));
-    expect(state.constructor.bun).toEqual(mockBun);
+  // проверка инициализации rootReducer
+  test('инициализация с undefined состоянием возвращает initialState', () => {
+    const state = burgerReducer(undefined, { type: '@@INIT' });
+    expect(state).toEqual(initialState);
   });
 
-  test('addIngredient добавляет ингредиент', () => {
-    const state = reducer(initialState, addIngredient(mockIngredient));
+  // обработка экшена добавления ингредиента
+  test('обработка addIngredient добавляет ингредиент с уникальным id', () => {
+    const state = burgerReducer(initialState, addIngredient(mockIngredient));
+    
     expect(state.constructor.ingredients).toHaveLength(1);
     expect(state.constructor.ingredients[0]).toMatchObject({
       _id: mockIngredient._id,
       name: mockIngredient.name,
       type: mockIngredient.type,
+      price: mockIngredient.price
     });
-    expect(state.constructor.ingredients[0].id).toBeDefined(); // уникальный id
+    expect(state.constructor.ingredients[0].id).toBeDefined();
   });
 
-  test('removeIngredient удаляет ингредиент по id', () => {
-    const addedState = reducer(initialState, addIngredient(mockIngredient));
-    const ingredientId = addedState.constructor.ingredients[0].id;
-    const state = reducer(addedState, removeIngredient(ingredientId));
-    expect(state.constructor.ingredients).toHaveLength(0);
-  });
-
-  test('moveIngredient меняет порядок ингредиентов', () => {
-    const ing1: TConstructorIngredient = { ...mockIngredient, id: '1' };
-    const ing2: TConstructorIngredient = { ...mockIngredient, id: '2' };
-    const stateWithIngredients: BurgerState = {
+  // обработка экшена удаления ингредиента
+  test('обработка removeIngredient удаляет ингредиент по id', () => {
+    const stateWithIngredients = {
       ...initialState,
-      constructor: { bun: null, ingredients: [ing1, ing2] },
+      constructor: {
+        bun: null,
+        ingredients: [
+          { ...mockIngredient, id: 'id-1' },
+          { ...mockIngredient, _id: 'main2', name: 'Сыр', id: 'id-2' }
+        ]
+      }
     };
 
-    const state = reducer(stateWithIngredients, moveIngredient({ fromIndex: 0, toIndex: 1 }));
-    expect(state.constructor.ingredients[0].id).toBe('2');
-    expect(state.constructor.ingredients[1].id).toBe('1');
+    const state = burgerReducer(stateWithIngredients, removeIngredient('id-1'));
+    
+    expect(state.constructor.ingredients).toHaveLength(1);
+    expect(state.constructor.ingredients[0].id).toBe('id-2');
   });
 
-  test('clearConstructor очищает булку и ингредиенты', () => {
-    const stateWithConstructor: BurgerState = {
+  // обработка экшена изменения порядка ингредиентов
+  test('обработка moveIngredient меняет порядок ингредиентов', () => {
+    const stateWithIngredients = {
       ...initialState,
-      constructor: { bun: mockBun, ingredients: [{ ...mockIngredient, id: '1' }] },
+      constructor: {
+        bun: null,
+        ingredients: [
+          { ...mockIngredient, id: 'id-1' },
+          { ...mockIngredient, _id: 'main2', name: 'Сыр', id: 'id-2' },
+          { ...mockIngredient, _id: 'main3', name: 'Соус', id: 'id-3' }
+        ]
+      }
     };
-    const state = reducer(stateWithConstructor, clearConstructor());
+
+    const state = burgerReducer(
+      stateWithIngredients, 
+      moveIngredient({ fromIndex: 0, toIndex: 2 })
+    );
+    
+    expect(state.constructor.ingredients[0].id).toBe('id-2');
+    expect(state.constructor.ingredients[1].id).toBe('id-3');
+    expect(state.constructor.ingredients[2].id).toBe('id-1');
+  });
+
+  test('addBun добавляет булку', () => {
+    const state = burgerReducer(initialState, addBun(mockBun));
+    expect(state.constructor.bun).toEqual(mockBun);
+  });
+
+  test('clearConstructor очищает конструктор', () => {
+    const stateWithData = {
+      ...initialState,
+      constructor: {
+        bun: mockBun,
+        ingredients: [{ ...mockIngredient, id: 'id-1' }]
+      }
+    };
+
+    const state = burgerReducer(stateWithData, clearConstructor());
     expect(state.constructor.bun).toBeNull();
-    expect(state.constructor.ingredients).toHaveLength(0);
+    expect(state.constructor.ingredients).toEqual([]);
   });
 });

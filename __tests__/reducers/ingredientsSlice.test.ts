@@ -1,67 +1,80 @@
 import { describe, test, expect } from '@jest/globals';
-import reducer, { fetchIngredients, BurgerState, TIngredient } from '../../src/slices/burgerSlice';
+import burgerReducer, {
+  fetchIngredients,
+  initialState
+} from '../../src/slices/burgerSlice';
+import type { TIngredient } from '../../src/utils/types';
 
-describe('ingredientsSlice', () => {
-  const initialState: BurgerState = {
-    ingredients: { data: [], loading: false, error: null },
-    constructor: { bun: null, ingredients: [] },
-    user: { data: null, loading: false, error: null },
-    order: { data: null, loading: false, error: null },
-    userOrders: { data: [], loading: false, error: null },
-    feed: { data: [], total: 0, totalToday: 0, loading: false, error: null },
-  };
-
+describe('ingredients reducer', () => {
   const mockIngredients: TIngredient[] = [
     {
-      _id: '1',
-      name: 'Булка',
+      _id: 'ing1',
+      name: 'Флюоресцентная булка',
       type: 'bun',
-      price: 100,
+      proteins: 80,
+      fat: 24,
+      carbohydrates: 53,
+      calories: 420,
+      price: 1255,
       image: '',
-      image_large: '',
       image_mobile: '',
-      calories: 200,
-      proteins: 10,
-      fat: 5,
-      carbohydrates: 20,
+      image_large: '',
     },
     {
-      _id: '2',
-      name: 'Котлета',
+      _id: 'ing2',
+      name: 'Мясо бессмертных моллюсков',
       type: 'main',
-      price: 150,
+      proteins: 433,
+      fat: 244,
+      carbohydrates: 33,
+      calories: 4242,
+      price: 1337,
       image: '',
-      image_large: '',
       image_mobile: '',
-      calories: 300,
-      proteins: 20,
-      fat: 15,
-      carbohydrates: 5,
-    },
+      image_large: '',
+    }
   ];
 
-  test('fetchIngredients.pending устанавливает loading = true', () => {
-    const state = reducer(initialState, { type: fetchIngredients.pending.type });
+  test('начальное состояние ingredients', () => {
+    const state = burgerReducer(undefined, { type: 'UNKNOWN_ACTION' });
+    expect(state.ingredients.data).toEqual([]);
+    expect(state.ingredients.loading).toBe(false);
+    expect(state.ingredients.error).toBeNull();
+  });
+
+  test('обработка экшена начала запроса (fetchIngredients.pending)', () => {
+    const action = fetchIngredients.pending('requestId');
+    const state = burgerReducer(initialState, action);
+    
     expect(state.ingredients.loading).toBe(true);
     expect(state.ingredients.error).toBeNull();
   });
 
-  test('fetchIngredients.fulfilled устанавливает data и loading = false', () => {
-    const state = reducer(initialState, {
-      type: fetchIngredients.fulfilled.type,
-      payload: mockIngredients,
-    });
+  test('обработка экшена успешного выполнения запроса (fetchIngredients.fulfilled)', () => {
+   
+    const pendingState = burgerReducer(initialState, fetchIngredients.pending('requestId'));
+    expect(pendingState.ingredients.loading).toBe(true);
+    
+    const action = fetchIngredients.fulfilled(mockIngredients, 'requestId');
+    const state = burgerReducer(pendingState, action);
+    
     expect(state.ingredients.loading).toBe(false);
     expect(state.ingredients.data).toEqual(mockIngredients);
     expect(state.ingredients.error).toBeNull();
   });
 
-  test('fetchIngredients.rejected устанавливает error и loading = false', () => {
-    const state = reducer(initialState, {
-      type: fetchIngredients.rejected.type,
-      error: { message: 'Ошибка' },
-    });
+  test('обработка экшена ошибки запроса (fetchIngredients.rejected)', () => {
+   
+    const pendingState = burgerReducer(initialState, fetchIngredients.pending('requestId'));
+    
+    // обрабатываем ошибку
+    const error = new Error('Network Error');
+    const action = fetchIngredients.rejected(error, 'requestId');
+    const state = burgerReducer(pendingState, action);
+    
+    // Ошибка записывается, loading = false
     expect(state.ingredients.loading).toBe(false);
-    expect(state.ingredients.error).toBe('Ошибка');
+    expect(state.ingredients.error).toBe('Network Error');
+    expect(state.ingredients.data).toEqual([]);
   });
 });

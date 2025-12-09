@@ -5,9 +5,10 @@ const config: Config = {
   collectCoverage: true,
 
   collectCoverageFrom: [
-    'src/services/**/*.{ts,tsx}',
+    'src/**/*.{ts,tsx}',
     '!src/**/*.d.ts',
-    '!src/**/*.test.{ts,tsx}',
+    '!**/*.test.{ts,tsx}',
+    '!**/*.spec.{ts,tsx}',
   ],
 
   coverageDirectory: 'coverage',
@@ -24,35 +25,42 @@ const config: Config = {
     },
   },
 
-  moduleFileExtensions: [
-    'js',
-    'mjs',
-    'cjs',
-    'jsx',
-    'ts',
-    'mts',
-    'cts',
-    'tsx',
-    'json',
-    'node',
-  ],
+  moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx', 'json', 'node'],
 
+  // ВАЖНО: Добавьте ВСЕ алиасы из tsconfig.json
   moduleNameMapper: {
+    // Статические файлы
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
-      '<rootDir>/tests/__mocks__/fileMock.js',
-    '^@/(.*)$': '<rootDir>/src/$1',
+      '<rootDir>/__tests__/__mocks__/fileMock.js',
+    
+    // Алиасы из tsconfig.json
+    '^@api$': '<rootDir>/src/utils/burger-api.ts',
+    '^@utils-types$': '<rootDir>/src/utils/types',
+    '^@utils-types/(.*)$': '<rootDir>/src/utils/types/$1',
+    '^@pages$': '<rootDir>/src/pages',
+    '^@pages/(.*)$': '<rootDir>/src/pages/$1',
+    '^@components$': '<rootDir>/src/components',
     '^@components/(.*)$': '<rootDir>/src/components/$1',
+    '^@ui$': '<rootDir>/src/components/ui',
     '^@ui/(.*)$': '<rootDir>/src/components/ui/$1',
+    '^@ui-pages$': '<rootDir>/src/components/ui/pages',
+    '^@ui-pages/(.*)$': '<rootDir>/src/components/ui/pages/$1',
+    '^@slices$': '<rootDir>/src/services/slices',
+    '^@slices/(.*)$': '<rootDir>/src/services/slices/$1',
+    '^@selectors$': '<rootDir>/src/services/selectors',
+    '^@selectors/(.*)$': '<rootDir>/src/services/selectors/$1',
+    
+    // Общие алиасы
+    '^@/(.*)$': '<rootDir>/src/$1',
     '^@services/(.*)$': '<rootDir>/src/services/$1',
     '^@utils/(.*)$': '<rootDir>/src/utils/$1',
-    '^@pages/(.*)$': '<rootDir>/src/pages/$1',
   },
 
   resetMocks: true,
   restoreMocks: true,
 
-  roots: ['<rootDir>/src', '<rootDir>/tests'],
+  roots: ['<rootDir>/src', '<rootDir>/__tests__'],
 
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
 
@@ -61,31 +69,35 @@ const config: Config = {
   testEnvironment: 'jsdom',
 
   testMatch: [
-    '<rootDir>/tests/**/*.test.ts',
-    '<rootDir>/tests/**/*.test.tsx',
-    '<rootDir>/src/**/*.test.ts',
-    '<rootDir>/src/**/*.test.tsx',
+    '<rootDir>/__tests__/**/*.test.{ts,tsx}',
+    '<rootDir>/__tests__/**/*.spec.{ts,tsx}',
+    '<rootDir>/src/**/__tests__/**/*.test.{ts,tsx}',
+    '<rootDir>/src/**/__tests__/**/*.spec.{ts,tsx}',
+    '<rootDir>/src/**/*.test.{ts,tsx}',
+    '<rootDir>/src/**/*.spec.{ts,tsx}',
   ],
 
   testPathIgnorePatterns: ['/node_modules/', '/build/', '/dist/'],
 
+  // Исправьте transform согласно warning
   transform: {
     '^.+\\.(ts|tsx)$': [
       'ts-jest',
       {
         tsconfig: '<rootDir>/tsconfig.json',
-        isolatedModules: true,
+        // Уберите isolatedModules отсюда, добавьте в tsconfig.json
       },
     ],
   },
 
   transformIgnorePatterns: ['/node_modules/(?!(uuid|@ya.praktikum|@zlden)/)'],
 
-  globals: {
-    'ts-jest': {
-      tsconfig: '<rootDir>/tsconfig.json',
-    },
-  },
+  // Уберите globals полностью
+  // globals: {
+  //   'ts-jest': {
+  //     tsconfig: '<rootDir>/tsconfig.json',
+  //   },
+  // },
 
   verbose: true,
 

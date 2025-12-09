@@ -92,7 +92,8 @@
     "format": "prettier ./src --write",
     "GO": "npm run lint:fix && webpack serve --mode=development",
     "test": "jest",
-    "cypress:open": "cypress open"
+    "test:cypress": "cypress run", 
+    "test:cypress:open": "cypress open" 
   },
   "eslintConfig": {
     "extends": [

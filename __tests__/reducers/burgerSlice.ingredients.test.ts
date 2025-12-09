@@ -1,66 +1,97 @@
 import { describe, test, expect } from '@jest/globals';
+import burgerReducer, {
+  fetchIngredients,
+  initialState
+} from '../../src/slices/burgerSlice';
+import type { TIngredient } from '../../src/slices/burgerSlice';
 
-import burgerReducer, { initialState } from '../../src/slices/burgerSlice';
-import type { TIngredient } from '../../src/utils/types';
-
-type BurgerState = typeof initialState;
-
-describe('burgerSlice - ingredients слайс', () => {
+describe('ingredients reducer - асинхронные экшены', () => {
   const mockIngredients: TIngredient[] = [
     {
-      _id: 'ing-1',
-      name: 'Ингредиент 1',
-      type: 'main',
-      price: 100,
-      image: 'img1.jpg',
-      calories: 100,
-      proteins: 10,
-      fat: 5,
-      carbohydrates: 20,
+      _id: 'ing1',
+      name: 'Флюоресцентная булка',
+      type: 'bun',
+      proteins: 80,
+      fat: 24,
+      carbohydrates: 53,
+      calories: 420,
+      price: 1255,
+      image: '',
+      image_mobile: '',
       image_large: '',
-      image_mobile: ''
     },
     {
-      _id: 'ing-2',
-      name: 'Ингредиент 2',
-      type: 'sauce',
-      price: 50,
-      image: 'img2.jpg',
-      calories: 50,
-      proteins: 5,
-      fat: 2,
-      carbohydrates: 10,
+      _id: 'ing2',
+      name: 'Мясо бессмертных моллюсков',
+      type: 'main',
+      proteins: 433,
+      fat: 244,
+      carbohydrates: 33,
+      calories: 4242,
+      price: 1337,
+      image: '',
+      image_mobile: '',
       image_large: '',
-      image_mobile: ''
     }
   ];
 
-  test('начальное состояние ingredients', () => {
-    const state: BurgerState = initialState;
-    expect(state.ingredients.data).toEqual([]);
-    expect(state.ingredients.loading).toBe(false);
-    expect(state.ingredients.error).toBeNull();
-  });
-
+  // экшен начала запроса
   test('fetchIngredients.pending устанавливает loading = true', () => {
-    const action = { type: 'burger/fetchIngredients/pending' };
+    const action = fetchIngredients.pending('requestId');
     const state = burgerReducer(initialState, action);
+    
     expect(state.ingredients.loading).toBe(true);
     expect(state.ingredients.error).toBeNull();
   });
 
-  test('fetchIngredients.fulfilled добавляет ингредиенты и ставит loading = false', () => {
-    const action = { type: 'burger/fetchIngredients/fulfilled', payload: mockIngredients };
-    const state = burgerReducer(initialState, action);
-    expect(state.ingredients.data).toEqual(mockIngredients);
+  // экшен успешного выполнения
+  test('fetchIngredients.fulfilled записывает данные и устанавливает loading = false', () => {
+    // Симулируем состояние загрузки
+    const loadingState = {
+      ...initialState,
+      ingredients: {
+        ...initialState.ingredients,
+        loading: true
+      }
+    };
+
+    const action = fetchIngredients.fulfilled(mockIngredients, 'requestId');
+    const state = burgerReducer(loadingState, action);
+    
     expect(state.ingredients.loading).toBe(false);
+    expect(state.ingredients.data).toEqual(mockIngredients);
     expect(state.ingredients.error).toBeNull();
   });
 
-  test('fetchIngredients.rejected ставит error и loading = false', () => {
-    const action = { type: 'burger/fetchIngredients/rejected', error: { message: 'Ошибка' } };
-    const state = burgerReducer(initialState, action);
+  // экшен ошибки запроса
+  test('fetchIngredients.rejected записывает ошибку и устанавливает loading = false', () => {
+    const loadingState = {
+      ...initialState,
+      ingredients: {
+        ...initialState.ingredients,
+        loading: true
+      }
+    };
+
+    const error = new Error('Network Error');
+    const action = fetchIngredients.rejected(error, 'requestId');
+    const state = burgerReducer(loadingState, action);
+    
     expect(state.ingredients.loading).toBe(false);
-    expect(state.ingredients.error).toBe('Ошибка');
+    expect(state.ingredients.error).toBe('Network Error');
+    expect(state.ingredients.data).toEqual([]);
+  });
+
+  test('полный цикл асинхронного запроса ингредиентов', () => {
+    // Начало запроса
+    let state = burgerReducer(initialState, fetchIngredients.pending('requestId'));
+    expect(state.ingredients.loading).toBe(true);
+    expect(state.ingredients.error).toBeNull();
+    
+    // Успешное выполнение
+    state = burgerReducer(state, fetchIngredients.fulfilled(mockIngredients, 'requestId'));
+    expect(state.ingredients.loading).toBe(false);
+    expect(state.ingredients.data).toEqual(mockIngredients);
+    expect(state.ingredients.error).toBeNull();
   });
 });
